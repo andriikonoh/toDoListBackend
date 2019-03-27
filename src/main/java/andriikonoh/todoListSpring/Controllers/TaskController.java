@@ -16,6 +16,11 @@ public class TaskController {
         this.repository = repository;
     }
 
+    @GetMapping("tasks")
+    public List<Task> all() {
+        return repository.findAll();
+    }
+
     @GetMapping("/projects/{projectId}/tasks")
     public List<Task> getByProjectId(@PathVariable String projectId) {
         return repository.findAll()
@@ -49,4 +54,12 @@ public class TaskController {
     public void deleteTask(@PathVariable Long id) {
         repository.deleteById(id);
     }
+
+    @DeleteMapping("/projects/{projectId}/tasks")
+        public void deleteTaskByProjectId(@PathVariable String projectId) {
+            repository.findAll()
+                    .stream()
+                    .filter(task -> task.getProjectId().equals(projectId))
+                    .forEach(task -> repository.deleteById(task.getId()));
+        }
 }
