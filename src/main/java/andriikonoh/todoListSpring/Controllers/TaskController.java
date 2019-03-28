@@ -1,7 +1,11 @@
 package andriikonoh.todoListSpring.Controllers;
 
 import andriikonoh.todoListSpring.Entity.Task;
+import andriikonoh.todoListSpring.EntityDTO.TaskDTO;
+import andriikonoh.todoListSpring.Repository.ProjectRepository;
 import andriikonoh.todoListSpring.Repository.TaskRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,36 +15,47 @@ import java.util.stream.Collectors;
 @CrossOrigin
 public class TaskController {
     private final TaskRepository repository;
+    private final ProjectRepository projectRepository;
 
-    public TaskController(TaskRepository repository) {
+    public TaskController(TaskRepository repository, ProjectRepository projectRepository) {
         this.repository = repository;
+        this.projectRepository = projectRepository;
     }
 
     @GetMapping("tasks")
-    public List<Task> all() {
-        return repository.findAll();
+    public ResponseEntity all() {
+        List<TaskDTO> tasksDTO = repository.findAll()
+                .stream()
+                .map(task -> mapIntoDTO(task))
+                .collect(Collectors.toList());
+        return new ResponseEntity<List<TaskDTO>>(tasksDTO, HttpStatus.OK);
     }
 
     @GetMapping("/projects/{projectId}/tasks")
-    public List<Task> getByProjectId(@PathVariable String projectId) {
-        return repository.findAll()
+    public ResponseEntity getByProjectId(@PathVariable String projectId) {
+        List<TaskDTO> tasksDTO = repository.findAll()
                 .stream()
-                .filter(task -> task.getProjectId().equals(projectId))
+                .filter(task -> task.getProject().getId().toString().equals(projectId))
+                .map(task -> mapIntoDTO(task))
                 .collect(Collectors.toList());
+        return new ResponseEntity<List<TaskDTO>>(tasksDTO, HttpStatus.OK);
     }
 
     @PostMapping("/tasks")
-    public Task createTask(@RequestBody Task newTask) {
-        return repository.save(newTask);
+    public ResponseEntity createTask(@RequestBody TaskDTO taskDTO) {
+        Task taskAfterSave = repository.save(mapFromDTO(taskDTO));
+
+        TaskDTO taskDTOAfterSave = mapIntoDTO(taskAfterSave);
+        return new ResponseEntity<TaskDTO>(taskDTOAfterSave, HttpStatus.CREATED);
     }
 
     @PutMapping("tasks/{id}")
-    public Task replaceTask(@RequestBody Task newTask, @PathVariable Long id) {
-        return repository.findById(id)
+    public ResponseEntity replaceTask(@RequestBody TaskDTO taskDTO, @PathVariable Long id) {
+        Task newTask = mapFromDTO(taskDTO);
+        Task taskAfterSave = repository.findById(id)
                 .map(task -> {
                     task.setName(newTask.getName());
-                    task.setProjectId(newTask.getProjectId());
-                    task.setId(newTask.getId());
+                    task.setProject(newTask.getProject());
                     task.setDone(newTask.isDone());
                     return repository.save(task);
                 })
@@ -48,6 +63,8 @@ public class TaskController {
                     newTask.setId(id);
                     return repository.save(newTask);
                 });
+        TaskDTO taskDTOAfterSave = mapIntoDTO(taskAfterSave);
+        return new ResponseEntity<TaskDTO>(taskDTOAfterSave, HttpStatus.OK);
     }
 
     @DeleteMapping("/tasks/{id}")
@@ -55,11 +72,20 @@ public class TaskController {
         repository.deleteById(id);
     }
 
-    @DeleteMapping("/projects/{projectId}/tasks")
-        public void deleteTaskByProjectId(@PathVariable String projectId) {
-            repository.findAll()
-                    .stream()
-                    .filter(task -> task.getProjectId().equals(projectId))
-                    .forEach(task -> repository.deleteById(task.getId()));
-        }
+   private Task mapFromDTO(TaskDTO taskDTO) {
+       Task newTask = new Task();
+       newTask.setName(taskDTO.getName());
+       newTask.setDone(taskDTO.isDone());
+       newTask.setProject(projectRepository.getOne(Long.parseLong(taskDTO.getProjectId())));
+       return newTask;
+   }
+
+   private TaskDTO mapIntoDTO(Task task) {
+       TaskDTO taskDTO = new TaskDTO();
+       taskDTO.setName(task.getName());
+       taskDTO.setDone(task.isDone());
+       taskDTO.setId(task.getId());
+       taskDTO.setProjectId(task.getProject().getId().toString());
+       return taskDTO;
+   }
 }

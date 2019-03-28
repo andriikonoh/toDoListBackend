@@ -2,9 +2,9 @@ package andriikonoh.todoListSpring.Entity;
 
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
@@ -12,6 +12,9 @@ public class Project {
 
     private @Id @GeneratedValue Long id;
     private String name;
+    //after add ProjectDTO
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Task> projectTasks = new ArrayList<>();
 
     public Project() {}
 
