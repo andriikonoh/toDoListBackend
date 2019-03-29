@@ -14,10 +14,4 @@ public class Project {
     private String name;
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Task> projectTasks = new ArrayList<>();
-
-    public Project() {}
-
-    public Project(String name) {
-        this.name = name;
-    }
 }

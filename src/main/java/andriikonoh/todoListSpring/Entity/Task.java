@@ -12,6 +12,4 @@ public class Task {
     private String name;
     private boolean done;
     private @ManyToOne Project project;
-
-
 }
