@@ -12,7 +12,6 @@ public class Project {
 
     private @Id @GeneratedValue Long id;
     private String name;
-    //after add ProjectDTO
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Task> projectTasks = new ArrayList<>();
 
