@@ -28,7 +28,7 @@ public class TaskController {
                 .stream()
                 .map(task -> mapIntoDTO(task))
                 .collect(Collectors.toList());
-        return new ResponseEntity<List<TaskDTO>>(tasksDTO, HttpStatus.OK);
+        return new ResponseEntity<>(tasksDTO, HttpStatus.OK);
     }
 
     @GetMapping("/projects/{projectId}/tasks")
@@ -38,7 +38,7 @@ public class TaskController {
                 .filter(task -> task.getProject().getId().toString().equals(projectId))
                 .map(task -> mapIntoDTO(task))
                 .collect(Collectors.toList());
-        return new ResponseEntity<List<TaskDTO>>(tasksDTO, HttpStatus.OK);
+        return new ResponseEntity<>(tasksDTO, HttpStatus.OK);
     }
 
     @PostMapping("/tasks")
@@ -46,7 +46,7 @@ public class TaskController {
         Task taskAfterSave = repository.save(mapFromDTO(taskDTO));
 
         TaskDTO taskDTOAfterSave = mapIntoDTO(taskAfterSave);
-        return new ResponseEntity<TaskDTO>(taskDTOAfterSave, HttpStatus.CREATED);
+        return new ResponseEntity<>(taskDTOAfterSave, HttpStatus.CREATED);
     }
 
     @PutMapping("tasks/{id}")
@@ -64,7 +64,7 @@ public class TaskController {
                     return repository.save(newTask);
                 });
         TaskDTO taskDTOAfterSave = mapIntoDTO(taskAfterSave);
-        return new ResponseEntity<TaskDTO>(taskDTOAfterSave, HttpStatus.OK);
+        return new ResponseEntity<>(taskDTOAfterSave, HttpStatus.OK);
     }
 
     @DeleteMapping("/tasks/{id}")

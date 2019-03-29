@@ -28,16 +28,16 @@ public class ProjectController {
     public ResponseEntity getAll() {
         List<ProjectDTO> projectsDTO = repository.findAll()
                 .stream()
-                .map(project -> mapIntoDTO(project))
+                .map(this::mapIntoDTO)
                 .collect(Collectors.toList());
-        return new ResponseEntity(projectsDTO, HttpStatus.OK);
+        return new ResponseEntity<>(projectsDTO, HttpStatus.OK);
     }
 
     @GetMapping("/projects/{id}")
     public ResponseEntity getOne(@PathVariable Long id) {
         Project project = repository.findById(id).orElseThrow(()->new ProjectNotFoundException(id));
         ProjectDTO projectDTO = mapIntoDTO(project);
-        return new ResponseEntity(projectDTO, HttpStatus.OK);
+        return new ResponseEntity<>(projectDTO, HttpStatus.OK);
     }
 
     @PostMapping("/projects")
@@ -45,7 +45,7 @@ public class ProjectController {
         Project projectAfterSave = repository.save(mapFromDTO(projectDTO));
 
         ProjectDTO projectDTOAfterSave = mapIntoDTO(projectAfterSave);
-        return new ResponseEntity(projectDTOAfterSave, HttpStatus.CREATED);
+        return new ResponseEntity<>(projectDTOAfterSave, HttpStatus.CREATED);
     }
 
     @PutMapping("projects/{id}")
@@ -61,7 +61,7 @@ public class ProjectController {
                     return repository.save(newProject);
                 });
         ProjectDTO projectDTOAfterSave = mapIntoDTO(projectAfterSave);
-        return new ResponseEntity(projectDTOAfterSave, HttpStatus.OK);
+        return new ResponseEntity<>(projectDTOAfterSave, HttpStatus.OK);
     }
 
     @DeleteMapping("/projects/{id}")
@@ -72,7 +72,6 @@ public class ProjectController {
     private Project mapFromDTO(ProjectDTO projectDTO) {
         Project project = new Project();
         project.setName(projectDTO.getName());
-        //project.setProjectTasks();
         return project;
     }
 
